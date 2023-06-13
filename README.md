@@ -6,7 +6,7 @@
 
 - 克隆项目
 - 激活Python3环境，并安装依赖
-  - python -m pip install -r requirements-3.5.txt
+  - python -m pip install -r requirements-3.txt
 
 ## 使用方式
 
