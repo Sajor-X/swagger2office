@@ -1,0 +1,6 @@
+
+
+python-docx
+jsonschema
+wget
+
