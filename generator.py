@@ -76,7 +76,7 @@ def create_sheet_request(worksheet, excel, req):
     border = openpyxl.styles.Side(style='thin', color='000000')
     border_style = openpyxl.styles.Border(left=border, right=border, top=border, bottom=border)
 
-    for i, header in enumerate(['标签名称', '中文说明', '字段类型', '字典长度', '是否必填', '验证方式', '备注'],
+    for i, header in enumerate(['标签名称', '中文说明', '字段类型', '字典长度', '是否必填', '请求方式', '备注'],
                                start=1):
         worksheet.cell(row=9, column=i, value=header).font, \
             worksheet.cell(row=9, column=i, value=header).fill = bg_font, pattern_fill
@@ -86,6 +86,7 @@ def create_sheet_request(worksheet, excel, req):
         worksheet.cell(row=10 + i, column=2, value=req_data[i].desc)
         worksheet.cell(row=10 + i, column=3, value=req_data[i].type)
         worksheet.cell(row=10 + i, column=5, value='是' if req_data[i].require else '否')
+        worksheet.cell(row=10 + i, column=6, value=req_data[i].mode)
         worksheet.cell(row=10 + i, column=7, value=req_data[i].desc)
         for j in range(1, 8):
             worksheet.cell(row=10 + i, column=j).border = border_style
@@ -128,7 +129,9 @@ def create_child_cell(datas, deep=0):
         require = data.get('require')
         name = data.get('name')
         type = data.get('type')
-        d.append(BodyItem(children, desc, require, name, type, deep))
+        mode = data.get('in')
+        schema_value = data.get('schemaValue')
+        d.append(BodyItem(children, desc, require, name, type, mode, schema_value, deep))
         d.extend(children)
     return d
 

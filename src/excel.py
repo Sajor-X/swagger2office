@@ -52,12 +52,14 @@ class BodyItem(object):
     请求&返回体 分项
     """
 
-    def __init__(self, child, desc, require, name, type, deep):
+    def __init__(self, child, desc, require, name, type, mode, schema_value, deep):
         self.name = name
         self.require = require
         self.desc = desc
         self.type = type
         self.child = child
+        self.mode = mode
+        self.schema_value = schema_value
         self.deep = deep
 
     def __str__(self) -> str:
