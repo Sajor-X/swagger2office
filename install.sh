@@ -22,4 +22,4 @@ set -x #echo on
 git clone https://github.com/Sajor-X/swagger2office.git
 
 cd swagger2office
-pip3 install -r requirements-3.5.txt
+pip3 install -r requirements-3.txt

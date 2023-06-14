@@ -1,5 +1,6 @@
 import json
 import re
+from typing import List
 
 
 class Project(object):
@@ -22,34 +23,74 @@ class Project(object):
         self.author = author
         self.host = host
         self.version = version
-        self.interface_list = []
+        self.interface_group_list: List[Group] = []
+        self.separator = "-"
 
-    def append_interface(self, item):
-        self.interface_list.append(item)
+        self.resp_map = {
+            'pageNum': {
+                'chinese': '分页页数',
+                'require': True,
+                'desc': '分页参数中的页数，默认为第一页'
+            },
+            'total': {
+                'chinese': '总数',
+                'require': True,
+                'desc': '总条数，可搭配分页使用'
+            },
+            'list': {
+                'chinese': '具体数据',
+                'require': True,
+                'desc': '具体数据列表'
+            },
+            'pageSize': {
+                'chinese': '分页大小',
+                'require': True,
+                'desc': '分页参数中的页大小，默认为10条'
+            },
+            'code': {
+                'chinese': '状态码',
+                'require': True,
+                'desc': '1成功，0失败，-1异常'
+            },
+            'message': {
+                'chinese': '状态说明',
+                'require': False,
+                'desc': '异常时返回错误信息'
+            },
+            'data': {
+                'chinese': '返回数据',
+                'require': True,
+                'desc': ''
+            }
+        }
+
+    def append_group(self, item):
+        self.interface_group_list.append(item)
 
     def __str__(self) -> str:
         string = """title:{}, name:{}, desc:{}, author:{}, host:{}, version:{}"""
         return string.format(self.title, self.name, self.desc, self.author, self.host, self.version)
 
+class Group(object):
+    def __init__(self, title, desc):
+        self.title = title
+        self.desc = desc
+        self.interface_list: List[Interface] = []
+    def append_interface(self, item):
+        self.interface_list.append(item)
+
 
 class Interface(object):
-    def __init__(self, name, desc, method, summary, url, produces, consumes):
-        self.request_params = []
-        self.response_params = []
+    def __init__(self, name, desc, method, group, url, produces, consumes):
+        self.request_params: List[BodyItem] = []
+        self.response_params: List[BodyItem] = []
         self.url = url
         self.name = name
         self.desc = desc
         self.method = method
-        self.summary = summary
+        self.group = group
         self.produces = produces
         self.consumes = consumes
-
-    def append_request(self, item):
-        self.request_params.append(item)
-
-    def append_response(self, item):
-        self.response_params.append(item)
-
 
 class BodyItem(object):
     """
@@ -145,8 +186,10 @@ class ParseAPIDoc(object):
         for tag in tags:
             one_title = tag.get('name')
             one_description = tag.get('description')
+            # 创建接口组
+            interface_group = Group(one_title, one_description)
             for child in tag.get('childrens'):
-                desc = child.get('description').replace("<p>", "").replace("</p>", "")
+                desc = child.get('description').replace("<p>", "").replace("</p>", "").rstrip('\n')
                 method = child.get('methodType')
                 url = child.get('showUrl')
                 summary = child.get('summary').replace('[', '【').replace(']', '】')
@@ -154,11 +197,14 @@ class ParseAPIDoc(object):
                 consumes = child.get('consumes')
                 req_params = child.get('reqParameters')
                 resp_params = child.get('multipData').get('responseParameters')
-                interface = Interface(name=one_title, desc=desc, method=method, summary=summary, url=url,
+                interface = Interface(name=summary, desc=desc, method=method, group=one_title, url=url,
                                       produces=produces, consumes=consumes)
-                interface.append_request(self.parse_child(req_params))
-                interface.append_response(self.parse_child(resp_params))
-                self.project.append_interface(interface)
+                interface.request_params = self.parse_child(req_params)
+                interface.response_params = self.parse_child(resp_params)
+
+                interface_group.append_interface(interface)
+
+            self.project.append_group(interface_group)
 
     def run(self, file_name):
         """
