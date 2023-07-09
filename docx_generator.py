@@ -1,3 +1,5 @@
+import os
+
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Inches
@@ -32,7 +34,8 @@ class APIDocumentation:
             pass  # TODO
         cell_properties.append(cell_shading)  # finally extend cell props with shading element
 
-    def _add_heading(self, text, level=None):
+    def _add_heading(self, text, level=0):
+        level += 1
         heading = self.document.add_heading("", level=level)
         run = heading.add_run(text)
         run.font.name = self.font_name
@@ -143,9 +146,9 @@ class APIDocumentation:
     def create_basic_information(self, interface: Interface):
         # Add the main title
         self._add_heading(interface.name, 2)
-
+        desc = interface.desc if interface.desc is not None and len(interface.desc) != 0 else interface.name
         # Add the subheadings
-        self._add_paragraph(interface.desc)
+        self._add_paragraph(desc)
         self._add_heading('基本信息', level=3)
 
         # Add the details for the basic information
@@ -183,14 +186,22 @@ class APIDocumentation:
                     font.name = '宋体'
                     font._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
 
-    def save_document(self):
+    def save_document(self, doc_name):
         # Save the document
         self.set_font()
-        self.document.save(self.doc_name + '.docx')
+        self.document.save(doc_name)
 
 
 if __name__ == '__main__':
-    project = ParseAPIDoc().run('swagger.html')
+    for dirpath, dirnames, filenames in os.walk("."):
+        for filename in filenames:
+            if filename.endswith(".html"):
+                try:
+                    file_path = os.path.join(dirpath, filename)
+                    print(file_path)
+                    project = ParseAPIDoc().run(file_path)
 
-    api_doc = APIDocumentation(project)
-    api_doc.save_document()
+                    api_doc = APIDocumentation(project)
+                    api_doc.save_document(os.path.join(dirpath, filename.replace(".html", ".docx")))
+                except Exception as ignore:
+                    print(ignore)

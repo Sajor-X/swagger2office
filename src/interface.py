@@ -126,7 +126,7 @@ class ParseAPIDoc(object):
         with open(file_name, 'r', encoding='utf-8') as f:
             findall = re.findall("var datas=(.*);\n", f.read())
             if len(findall) != 1:
-                exit(0)
+                raise Exception
             return json.loads(findall[0])
 
     def parse_instance(self, instance):

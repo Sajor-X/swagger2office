@@ -16,3 +16,9 @@
 
 和generator放到同一路径下，执行generator输入文档名和host地址
 
+
+## 打包
+
+``` bash 
+python -m PyInstaller -F .\docx_generator.py -i .\favicon.ico -p ./ -w -n swagger2office
+```
