@@ -12,4 +12,7 @@
 
 在swagger页面导出HTML文件，重命名为swagger.html
 
-和generator.py放到同一路径下，执行generator.py 输入文档名和host地址
+![doc/img.png](doc/img.png)
+
+和generator放到同一路径下，执行generator输入文档名和host地址
+
