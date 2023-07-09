@@ -1,4 +1,3 @@
-# Import the necessary libraries
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Inches
@@ -33,12 +32,25 @@ class APIDocumentation:
             pass  # TODO
         cell_properties.append(cell_shading)  # finally extend cell props with shading element
 
+    def _add_heading(self, text, level=None):
+        heading = self.document.add_heading("", level=level)
+        run = heading.add_run(text)
+        run.font.name = self.font_name
+        run._element.rPr.rFonts.set(qn('w:eastAsia'), self.font_name)
+
+    def _add_paragraph(self, text):
+        paragraph = self.document.add_paragraph("")
+        run = paragraph.add_run(text)
+        run.font.name = self.font_name
+        run._element.rPr.rFonts.set(qn('w:eastAsia'), self.font_name)
+
     def __init__(self, project: Project, title=None):
         self.project = project
+        self.font_name = u'宋体'
         self.doc_name = title if title else project.title
         # Create a new document
         self.document = Document()
-        self.document.add_heading(self.doc_name, level=0)
+        self._add_heading(self.doc_name, level=0)
 
         for group in project.interface_group_list:
             self.create_group(group)
@@ -46,12 +58,11 @@ class APIDocumentation:
                 self.create_interface(interface)
 
     def create_group(self, group):
-        self.document.add_heading(group.title, 1)
-
+        self._add_heading(group.title, 1)
 
     def create_request_param(self, request_params):
         # Add the subheadings for the request and response parameters
-        self.document.add_heading('请求参数', level=3)
+        self._add_heading('请求参数', level=3)
         table = self.document.add_table(rows=1, cols=6)
         table.alignment = WD_TABLE_ALIGNMENT.CENTER  # 表格居中
         table.autofit = False
@@ -95,7 +106,7 @@ class APIDocumentation:
 
     def create_response_param(self, response_params):
 
-        self.document.add_heading('响应参数', level=3)
+        self._add_heading('响应参数', level=3)
         table = self.document.add_table(rows=1, cols=3)
         table_style = self.document.styles['Table Grid']
         table.style = table_style
@@ -131,17 +142,15 @@ class APIDocumentation:
 
     def create_basic_information(self, interface: Interface):
         # Add the main title
-        self.document.add_heading(interface.name, 2)
+        self._add_heading(interface.name, 2)
 
         # Add the subheadings
-        self.document.add_paragraph(interface.desc)
-
-        self.document.add_heading('基本信息', level=3)
+        self._add_paragraph(interface.desc)
+        self._add_heading('基本信息', level=3)
 
         # Add the details for the basic information
-        self.document.add_paragraph('接口地址：' + interface.url)
-        self.document.add_paragraph('请求方式：' + interface.method)
-
+        self._add_paragraph('接口地址：' + interface.url)
+        self._add_paragraph('请求方式：' + interface.method)
 
     def create_interface(self, interface: Interface):
         self.create_basic_information(interface)
@@ -149,6 +158,9 @@ class APIDocumentation:
         self.create_response_param(interface.response_params)
 
     def set_font(self):
+        self.document.styles['Normal'].font.name = u'宋体'
+        self.document.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
+
         # 获取所有段落和文本框
         elements = self.document.paragraphs
 
@@ -158,13 +170,7 @@ class APIDocumentation:
             font = element.style.font
             # 将字体设置为宋体
             font.name = '宋体'
-
-        # 遍历所有标题
-        for heading in self.document.paragraphs:
-            # 获取标题的字体
-            font = heading.style.font
-            # 将字体设置为宋体
-            font.name = '宋体'
+            font._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
 
         # 遍历所有表格
         for table in self.document.tables:
@@ -175,6 +181,7 @@ class APIDocumentation:
                     font = cell.paragraphs[0].style.font
                     # 将字体设置为宋体
                     font.name = '宋体'
+                    font._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
 
     def save_document(self):
         # Save the document
