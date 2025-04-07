@@ -197,10 +197,12 @@ class ParseAPIDoc(object):
                 consumes = child.get('consumes')
                 req_params = child.get('reqParameters')
                 resp_params = child.get('multipData').get('responseParameters')
+                # 找到返回值为200的
+                resp_params_2 = child.get('multipCodeDatas')[0].get('data')
                 interface = Interface(name=summary, desc=desc, method=method, group=one_title, url=url,
                                       produces=produces, consumes=consumes)
                 interface.request_params = self.parse_child(req_params)
-                interface.response_params = self.parse_child(resp_params)
+                interface.response_params = self.parse_child(resp_params if resp_params else resp_params_2)
 
                 interface_group.append_interface(interface)
 

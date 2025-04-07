@@ -141,7 +141,8 @@ class APIDocumentation:
             row_cells = table.add_row().cells
             row_cells[0].text = param.deep * self.project.separator + param.name
             row_cells[1].text = "object" if param.schema_value else param.type
-            row_cells[2].text = resp_map.get("chinese", param.desc) + resp_map.get('desc', "")
+            desc = resp_map.get("chinese", param.desc)
+            row_cells[2].text = desc if desc else "" + resp_map.get('desc', "")
 
     def create_basic_information(self, interface: Interface):
         # Add the main title
@@ -205,3 +206,4 @@ if __name__ == '__main__':
                     api_doc.save_document(os.path.join(dirpath, filename.replace(".html", ".docx")))
                 except Exception as ignore:
                     print(ignore)
+                    raise ignore
